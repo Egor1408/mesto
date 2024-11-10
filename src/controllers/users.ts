@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import User from '../models/user';
+import User from '../models/users';
 import errorsHandler from '../errorsHandler/errorsHandler';
+
+const VALID_ERROR = 400;
+const NOT_FOUND_ERROR = 404;
+const UNDEFINED_ERROR = 500;
 
 class UserController {
   static createUser(req: Request, res: Response) {
@@ -10,9 +14,9 @@ class UserController {
       .then((user) => res.send(user))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -21,7 +25,7 @@ class UserController {
     User.find()
       .then((usersList) => res.json(usersList))
       .catch(() => {
-        errorsHandler(res, 500);
+        errorsHandler(res, UNDEFINED_ERROR);
       });
   }
 
@@ -32,9 +36,9 @@ class UserController {
       .then((user) => res.send(user))
       .catch((err) => {
         if (err.name === 'CastError') {
-          errorsHandler(res, 404);
+          errorsHandler(res, NOT_FOUND_ERROR);
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -45,11 +49,11 @@ class UserController {
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else if (err.name === 'CastError') {
-          errorsHandler(res, 404);
+          errorsHandler(res, NOT_FOUND_ERROR);
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -61,11 +65,11 @@ class UserController {
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else if (err.name === 'CastError') {
-          errorsHandler(res, 404);
+          errorsHandler(res, NOT_FOUND_ERROR);
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }

@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-import userRouter from './routes/user';
-import cardRouter from './routes/card';
+import userRouter from './routes/users';
+import cardRouter from './routes/cards';
 
 const PORT = 3000;
 const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';

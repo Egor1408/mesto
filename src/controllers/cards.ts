@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
-import Card from '../models/card';
+import Card from '../models/cards';
 import errorsHandler from '../errorsHandler/errorsHandler';
+
+const VALID_ERROR = 400;
+const NOT_FOUND_ERROR = 404;
+const UNDEFINED_ERROR = 500;
 
 class CardController {
   static createCard(req: Request, res: Response) {
@@ -11,9 +15,9 @@ class CardController {
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -22,7 +26,7 @@ class CardController {
     Card.find()
       .then((cardsList) => res.send(cardsList))
       .catch(() => {
-        errorsHandler(res, 500);
+        errorsHandler(res, UNDEFINED_ERROR);
       });
   }
 
@@ -33,9 +37,9 @@ class CardController {
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'CastError') {
-          errorsHandler(res, 404, 'Карточка с таким ID не найдена');
+          errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -48,11 +52,11 @@ class CardController {
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else if (err.name === 'CastError') {
-          errorsHandler(res, 404, 'Карточка с таким ID не найдена');
+          errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }
@@ -65,11 +69,11 @@ class CardController {
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          errorsHandler(res, 400);
+          errorsHandler(res, VALID_ERROR);
         } else if (err.name === 'CastError') {
-          errorsHandler(res, 404, 'Карточка с таким ID не найдена');
+          errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
-          errorsHandler(res, 500);
+          errorsHandler(res, UNDEFINED_ERROR);
         }
       });
   }

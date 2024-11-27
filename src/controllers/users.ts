@@ -11,7 +11,7 @@ class UserController {
     const { name, about, avatar } = req.body;
 
     User.create({ name, about, avatar })
-      .then((user) => res.send(user))
+      .then((user) => res.status(201).send(user))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
@@ -33,9 +33,10 @@ class UserController {
     const { id } = req.params;
 
     User.findById(id)
+      .orFail(new Error('Not found'))
       .then((user) => res.send(user))
       .catch((err) => {
-        if (err.name === 'CastError') {
+        if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR);
         } else {
           errorsHandler(res, UNDEFINED_ERROR);
@@ -46,11 +47,12 @@ class UserController {
   static updateUser(req: Request, res: Response) {
     const { _id, name, about } = req.body;
     User.findByIdAndUpdate(_id, { name, about }, { new: true })
+      .orFail(new Error('Not found'))
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
-        } else if (err.name === 'CastError') {
+        } else if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR);
         } else {
           errorsHandler(res, UNDEFINED_ERROR);
@@ -62,11 +64,12 @@ class UserController {
     const { _id, avatar } = req.body;
 
     User.findByIdAndUpdate(_id, { avatar }, { new: true })
+      .orFail(new Error('Not found'))
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
-        } else if (err.name === 'CastError') {
+        } else if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR);
         } else {
           errorsHandler(res, UNDEFINED_ERROR);

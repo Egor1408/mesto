@@ -10,14 +10,16 @@ const app = express();
 app.use(express.json());
 app.use((req: Request, res: Response, next: NextFunction) => {
   req.user = {
-    _id: '6727a7e716b3a365da03fce1', // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '6727a7e716b3a365da03fce1',
   };
 
   next();
 });
 app.use('/', userRouter);
 app.use('/', cardRouter);
-
+app.use('*', (req: Request, res: Response) => {
+  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
+});
 async function startApp() {
   try {
     await mongoose.connect(DB_URL);

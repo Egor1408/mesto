@@ -12,7 +12,7 @@ class CardController {
     const owner = req.user._id;
 
     Card.create({ name, link, owner })
-      .then((card) => res.send(card))
+      .then((card) => res.status(201).send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
@@ -34,9 +34,10 @@ class CardController {
     const { id } = req.params;
 
     Card.findByIdAndDelete(id)
+      .orFail(new Error('Not found'))
       .then((card) => res.send(card))
       .catch((err) => {
-        if (err.name === 'CastError') {
+        if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
           errorsHandler(res, UNDEFINED_ERROR);
@@ -49,11 +50,12 @@ class CardController {
     const userId = req.user._id;
 
     Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
+      .orFail(new Error('Not found'))
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
-        } else if (err.name === 'CastError') {
+        } else if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
           errorsHandler(res, UNDEFINED_ERROR);
@@ -66,11 +68,12 @@ class CardController {
     const userId = req.user._id;
 
     Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
+      .orFail(new Error('Not found'))
       .then((card) => res.send(card))
       .catch((err) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
-        } else if (err.name === 'CastError') {
+        } else if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
           errorsHandler(res, UNDEFINED_ERROR);

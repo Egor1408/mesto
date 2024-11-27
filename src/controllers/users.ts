@@ -46,7 +46,7 @@ class UserController {
 
   static updateUser(req: Request, res: Response) {
     const { _id, name, about } = req.body;
-    User.findByIdAndUpdate(_id, { name, about }, { new: true })
+    User.findByIdAndUpdate(_id, { name, about }, { new: true, runValidators: true })
       .orFail(new Error('Not found'))
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {
@@ -63,7 +63,7 @@ class UserController {
   static updateUserAvatar(req: Request, res: Response) {
     const { _id, avatar } = req.body;
 
-    User.findByIdAndUpdate(_id, { avatar }, { new: true })
+    User.findByIdAndUpdate(_id, { avatar }, { new: true, runValidators: true })
       .orFail(new Error('Not found'))
       .then((updatedUser) => res.send(updatedUser))
       .catch((err) => {

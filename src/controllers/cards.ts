@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Card from '../models/cards';
-import errorsHandler from '../errorsHandler/errorsHandler';
+import errorsHandler from '../middlewares/errorsHandler';
+import { ICard } from 'interfaces/cards';
 
 const VALID_ERROR = 400;
 const NOT_FOUND_ERROR = 404;
@@ -12,8 +13,8 @@ class CardController {
     const owner = req.user._id;
 
     Card.create({ name, link, owner })
-      .then((card) => res.status(201).send(card))
-      .catch((err) => {
+      .then((card: ICard) => res.status(201).send(card))
+      .catch((err: Error) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
         } else {
@@ -24,7 +25,7 @@ class CardController {
 
   static getCardsList(req: Request, res: Response) {
     Card.find()
-      .then((cardsList) => res.send(cardsList))
+      .then((cardsList: ICard[]) => res.send(cardsList))
       .catch(() => {
         errorsHandler(res, UNDEFINED_ERROR);
       });
@@ -35,8 +36,8 @@ class CardController {
 
     Card.findByIdAndDelete(id)
       .orFail(new Error('Not found'))
-      .then((card) => res.send(card))
-      .catch((err) => {
+      .then((card: ICard) => res.send(card))
+      .catch((err: Error) => {
         if (err.message === 'Not found') {
           errorsHandler(res, NOT_FOUND_ERROR, 'Карточка с таким ID не найдена');
         } else {
@@ -51,8 +52,8 @@ class CardController {
 
     Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
       .orFail(new Error('Not found'))
-      .then((card) => res.send(card))
-      .catch((err) => {
+      .then((card: ICard) => res.send(card))
+      .catch((err: Error) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
         } else if (err.message === 'Not found') {
@@ -69,8 +70,8 @@ class CardController {
 
     Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
       .orFail(new Error('Not found'))
-      .then((card) => res.send(card))
-      .catch((err) => {
+      .then((card: ICard) => res.send(card))
+      .catch((err: Error) => {
         if (err.name === 'ValidationError') {
           errorsHandler(res, VALID_ERROR);
         } else if (err.message === 'Not found') {

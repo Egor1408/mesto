@@ -2,19 +2,15 @@ import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import userRouter from './routes/users';
 import cardRouter from './routes/cards';
+import auth from './middlewares/auth';
 
 const PORT = 3000;
 const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
 
 const app = express();
 app.use(express.json());
-app.use((req: Request, res: Response, next: NextFunction) => {
-  req.user = {
-    _id: '6727a7e716b3a365da03fce1',
-  };
 
-  next();
-});
+// app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
 app.use('*', (req: Request, res: Response) => {

@@ -1,21 +1,44 @@
 import express, { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import { errors } from 'celebrate';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import userRouter from './routes/users';
 import cardRouter from './routes/cards';
 import auth from './middlewares/auth';
+import UserController from './controllers/users';
+import errorHandler from './middlewares/errorHandler';
+import limiter from './middlewares/rateLimiter';
+import { requestLogger, errorLogger } from './middlewares/logger';
+import { NotFoundError } from './errors/CustomErrors';
 
 const PORT = 3000;
 const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
 
 const app = express();
+app.use(limiter);
+app.use(cookieParser());
+app.use(helmet());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
 
-// app.use(auth);
+app.post('/signup', UserController.createUser);
+app.post('/signin', UserController.login);
+
+app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
+
 app.use('*', (req: Request, res: Response) => {
-  res.status(404).json({ message: 'Запрашиваемый ресурс не найден' });
+  throw new NotFoundError('Страница не найдена');
 });
+
+
+app.use(errorLogger);
+app.use(errors());
+app.use(errorHandler);
+
 async function startApp() {
   try {
     await mongoose.connect(DB_URL);
@@ -28,3 +51,4 @@ async function startApp() {
 }
 
 startApp();
+

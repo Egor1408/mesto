@@ -1,21 +1,22 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/users';
-import errorsHandler from '../middlewares/errorsHandler';
 import { IUser } from 'interfaces/users';
-
-const VALID_ERROR = 400;
-const LOGIN_ERROR = 401;
-const NOT_FOUND_ERROR = 404;
-const UNDEFINED_ERROR = 500;
+import statusCodes from '../constants';
+import {
+  ConflictError,
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError
+} from '../errors/CustomErrors';
 
 const WEEK_TIME = 1000 * 60 * 60 * 24 * 7;
 
 class UserController {
-  static createUser(req: Request, res: Response) {
+
+  static createUser(req: Request, res: Response, next: NextFunction) {
     const { name, about, avatar, email, password } = req.body;
-    console.log(password);
 
     bcrypt.hash(password, 10)
       .then(hash => User.create({
@@ -25,100 +26,80 @@ class UserController {
         email,
         password: hash })
       .then((user: IUser) => res.status(201).send(user))
-      .catch((err: Error) => {
-        if (err.name === 'ValidationError') {
-          errorsHandler(res, VALID_ERROR);
-        } else {
-          errorsHandler(res, UNDEFINED_ERROR);
+      .catch((err) => {
+        if (err.code === 11000) {
+          return next(
+            new ConflictError('Пользователь с данной почтой уже существует'),
+          );
         }
+
+        if (err.statusCode === statusCodes.BAD_REQUEST) {
+          return next(new BadRequestError('Неверные данные пользователя'));
+        }
+
+        return next(err);
       })
     )
   }
 
-  static getUserList(req: Request, res: Response) {
+  static getUserList(req: Request, res: Response, next: NextFunction) {
     User.find()
-      .then((usersList) => res.json(usersList))
-      .catch(() => {
-        errorsHandler(res, UNDEFINED_ERROR);
-      });
+      .orFail(() => new NotFoundError('Пользователи не найдены'))
+      .then((users) => res.send(users))
+      .catch(next);
   }
 
-  static getUserById(req: Request, res: Response) {
+  static getUserById(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     User.findById(id)
-      .orFail(new Error('Not found'))
+      .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
       .then((user: IUser) => res.send(user))
-      .catch((err: Error) => {
-        if (err.message === 'Not found') {
-          errorsHandler(res, NOT_FOUND_ERROR);
-        } else {
-          errorsHandler(res, UNDEFINED_ERROR);
-        }
-      });
+      .catch(next);
   }
 
-  static updateUser(req: Request, res: Response) {
+  static updateUser(req: Request, res: Response, next: NextFunction) {
     const { _id, name, about } = req.body;
+
     User.findByIdAndUpdate(_id, { name, about }, { new: true, runValidators: true })
-      .orFail(new Error('Not found'))
+      .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
       .then((updatedUser: IUser) => res.send(updatedUser))
-      .catch((err: Error) => {
-        if (err.name === 'ValidationError') {
-          errorsHandler(res, VALID_ERROR);
-        } else if (err.message === 'Not found') {
-          errorsHandler(res, NOT_FOUND_ERROR);
-        } else {
-          errorsHandler(res, UNDEFINED_ERROR);
-        }
-      });
+      .catch(next);
   }
 
-  static updateUserAvatar(req: Request, res: Response) {
+  static updateUserAvatar(req: Request, res: Response, next: NextFunction) {
     const { _id, avatar } = req.body;
 
     User.findByIdAndUpdate(_id, { avatar }, { new: true, runValidators: true })
-      .orFail(new Error('Not found'))
+      .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
       .then((updatedUser: IUser) => res.send(updatedUser))
-      .catch((err: Error) => {
-        if (err.name === 'ValidationError') {
-          errorsHandler(res, VALID_ERROR);
-        } else if (err.message === 'Not found') {
-          errorsHandler(res, NOT_FOUND_ERROR);
-        } else {
-          errorsHandler(res, UNDEFINED_ERROR);
-        }
-      });
+      .catch(next);
   }
 
-  static login(req: Request, res: Response) {
+  static login(req: Request, res: Response, next: NextFunction) {
     const { email, password } = req.body;
-    let token = '';
 
-    User.findOne({ email })
-      .orFail(new Error('Login error'))
-      .then((user: IUser) => {
-        token = jwt.sign({ _id: user._id}, 'some-secret-key', { expiresIn: '7d' });
-        console.log(token);
+    User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+        expiresIn: '7d',
+      });
 
-        return bcrypt.compare(password, user.password)
-      })
-      .then((matched: any) => {
-        if (!matched) {
-          throw new Error('Login error')
-        }
-
-        res.cookie('jwt', token, { maxAge: WEEK_TIME, httpOnly: true })
-          .send({ message: 'Авторизация прошла успешно' });
-      })
-      .catch((err: Error) => {
-        if (err.message === 'Login error') {
-          errorsHandler(res, LOGIN_ERROR);
-        } else {
-          errorsHandler(res, UNDEFINED_ERROR);
-        }
-      })
+      res
+        .cookie('jwt', token, { maxAge: WEEK_TIME, httpOnly: true })
+        .send({ message: 'Авторизация прошла успешно' });
+    })
+    .catch(next);
   }
+
+  static getProfileData = (req: Request, res: Response, next: NextFunction) => {
+    const { _id } = req.body.user;
+
+    User.findById(_id)
+      .orFail(() => new UnauthorizedError('Требуется авторизация'))
+      .then((user) => res.send(user))
+      .catch(next);
+  };
 }
 
 export default UserController;

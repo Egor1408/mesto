@@ -1,8 +1,16 @@
+import mongoose from 'mongoose';
+
 export interface IUser {
-  _id:string,
   name: string,
   about: string,
   avatar: string,
   email: string,
   password: string
+}
+
+export interface IUserModel extends mongoose.Model<IUser> {
+  findUserByCredentials: (
+    email: string,
+    password: string
+  ) => Promise<mongoose.Document<unknown, any, IUser>>;
 }

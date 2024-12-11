@@ -11,12 +11,12 @@ userRouter.get(
   '/users',
   celebrate({
     cookies: Joi.object()
-    .keys({
-      jwt: Joi.string().required(),
-    })
-    .unknown(true),
+      .keys({
+        jwt: Joi.string().required(),
+      })
+      .unknown(true),
   }),
-  UserController.getUserList
+  UserController.getUserList,
 );
 
 userRouter.get(
@@ -28,7 +28,7 @@ userRouter.get(
       })
       .unknown(true),
   }),
-  UserController.getProfileData
+  UserController.getProfileData,
 );
 
 userRouter.patch(
@@ -45,7 +45,7 @@ userRouter.patch(
       user: Joi.object().required(),
     }),
   }),
-  UserController.updateUser
+  UserController.updateUser,
 );
 
 userRouter.patch(
@@ -65,7 +65,7 @@ userRouter.patch(
       user: Joi.object().required(),
     }),
   }),
-  UserController.updateUserAvatar
+  UserController.updateUserAvatar,
 );
 
 userRouter.get(

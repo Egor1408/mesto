@@ -13,7 +13,7 @@ cardRouter.get(
       })
       .unknown(true),
   }),
-  CardController.getCardsList
+  CardController.getCardsList,
 );
 
 cardRouter.post(
@@ -34,7 +34,7 @@ cardRouter.post(
       user: Joi.object(),
     }),
   }),
-  CardController.createCard
+  CardController.createCard,
 );
 
 cardRouter.delete(
@@ -49,7 +49,7 @@ cardRouter.delete(
       })
       .unknown(true),
   }),
-  CardController.deleteCardById
+  CardController.deleteCardById,
 );
 
 cardRouter.put(
@@ -64,7 +64,7 @@ cardRouter.put(
       })
       .unknown(true),
   }),
-  CardController.likeCard
+  CardController.likeCard,
 );
 
 cardRouter.delete(
@@ -79,7 +79,7 @@ cardRouter.delete(
       })
       .unknown(true),
   }),
-  CardController.dislikeCard
+  CardController.dislikeCard,
 );
 
 export default cardRouter;

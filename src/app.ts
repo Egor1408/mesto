@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import { errors } from 'celebrate';
 import helmet from 'helmet';
@@ -10,7 +10,7 @@ import UserController from './controllers/users';
 import errorHandler from './middlewares/errorHandler';
 import limiter from './middlewares/rateLimiter';
 import { requestLogger, errorLogger } from './middlewares/logger';
-import { NotFoundError } from './errors/CustomErrors';
+import NotFoundError from './errors/notFoundError';
 
 const PORT = 3000;
 const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
@@ -30,10 +30,9 @@ app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
-app.use('*', (req: Request, res: Response) => {
+app.use('*', () => {
   throw new NotFoundError('Страница не найдена');
 });
-
 
 app.use(errorLogger);
 app.use(errors());
@@ -51,4 +50,3 @@ async function startApp() {
 }
 
 startApp();
-

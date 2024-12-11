@@ -1,29 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
 import Card from '../models/cards';
 import { ICard } from '../interfaces/cards';
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError
-} from '../errors/CustomErrors';
+import BadRequestError from '../errors/badRequest';
+import ForbiddenError from '../errors/forbidError';
+import NotFoundError from '../errors/notFoundError';
 import statusCodes from '../constants';
 
 class CardController {
-
   static createCard(req: Request, res: Response, next: NextFunction) {
     const { name, link } = req.body;
 
     return Card.create({ name, link, owner: req.body.user._id })
-    .then((card) => {
-      res.status(statusCodes.CREATED).send(card);
-    })
-    .catch((err) => {
-      if (err.statusCode === statusCodes.BAD_REQUEST) {
-        return next(new BadRequestError('Неверные данные карточки'));
-      }
+      .then((card) => {
+        res.status(statusCodes.CREATED).send(card);
+      })
+      .catch((err) => {
+        if (err.statusCode === statusCodes.BAD_REQUEST) {
+          return next(new BadRequestError('Неверные данные карточки'));
+        }
 
-      return next(err);
-    });
+        return next(err);
+      });
   }
 
   static getCardsList(req: Request, res: Response, next: NextFunction) {

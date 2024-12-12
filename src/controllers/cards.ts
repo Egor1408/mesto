@@ -30,10 +30,10 @@ class CardController {
   }
 
   static deleteCardById(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
+    const { cardId } = req.params;
 
-    Card.findByIdAndDelete(id)
-      .orFail(new Error('Not found'))
+    Card.findById(cardId)
+      .orFail(new NotFoundError('Карточка с указанным id не найдена'))
       .then((card: ICard) => {
         if (card.owner.toString() === req.body.user._id) {
           Card.findByIdAndDelete(req.params.cardId)
@@ -46,20 +46,20 @@ class CardController {
   }
 
   static likeCard(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
-    const userId = req.user._id;
+    const { cardId } = req.params;
+    const userId = req.body.user._id;
 
-    Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
+    Card.findByIdAndUpdate(cardId, { $addToSet: { likes: userId } }, { new: true })
       .orFail(() => new NotFoundError('Карточка с указанным id не найдена'))
       .then((card: ICard) => res.send(card))
       .catch(next);
   }
 
   static dislikeCard(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
-    const userId = req.user._id;
+    const { cardId } = req.params;
+    const userId = req.body.user._id;
 
-    Card.findByIdAndUpdate(id, { $addToSet: { likes: userId } }, { new: true })
+    Card.findByIdAndUpdate(cardId, { $pull: { likes: userId } }, { new: true })
       .orFail(() => new NotFoundError('Карточка с указанным id не найдена'))
       .then((card: ICard) => res.send(card))
       .catch(next);

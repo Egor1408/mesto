@@ -11,11 +11,12 @@ import errorHandler from './middlewares/errorHandler';
 import limiter from './middlewares/rateLimiter';
 import { requestLogger, errorLogger } from './middlewares/logger';
 import NotFoundError from './errors/notFoundError';
+import * as dotenv from 'dotenv';
+import CONFIG from './config';
 
-const PORT = 3000;
-const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
-
+dotenv.config();
 const app = express();
+
 app.use(limiter);
 app.use(cookieParser());
 app.use(helmet());
@@ -25,7 +26,7 @@ app.use(requestLogger);
 
 app.post('/signup', UserController.createUser);
 app.post('/signin', UserController.login);
-
+console.log();
 app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
@@ -40,9 +41,9 @@ app.use(errorHandler);
 
 async function startApp() {
   try {
-    await mongoose.connect(DB_URL);
-    app.listen(PORT, () => {
-      console.log('server start on', '\x1b[36m', `http://localhost:${PORT}`);
+    await mongoose.connect(CONFIG.MONGO_URI);
+    app.listen(CONFIG.PORT, () => {
+      console.log('server start on', '\x1b[36m', `http://localhost:${CONFIG.PORT}`);
     });
   } catch (error) {
     console.log(error);

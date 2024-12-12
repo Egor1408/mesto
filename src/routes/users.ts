@@ -69,7 +69,7 @@ userRouter.patch(
 );
 
 userRouter.get(
-  '/:userId',
+  '/users/:userId',
   celebrate({
     params: {
       userId: Joi.string().alphanum().length(24).required(),

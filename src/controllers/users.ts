@@ -8,6 +8,7 @@ import BadRequestError from '../errors/badRequest';
 import ConflictError from '../errors/conflictError';
 import NotFoundError from '../errors/notFoundError';
 import UnauthorizedError from '../errors/unautorizedError';
+import CONFIG from '../config';
 
 const WEEK_TIME = 1000 * 60 * 60 * 24 * 7;
 
@@ -31,7 +32,7 @@ class UserController {
           password: hash,
         },
       )
-        .then((user: IUser) => res.status(201).send(user))
+        .then((user: IUser) => res.status(201).send({ message: 'Пользователь успешно зарегестрирован'}))
         .catch((err) => {
           if (err.code === 11000) {
             return next(
@@ -55,16 +56,17 @@ class UserController {
   }
 
   static getUserById(req: Request, res: Response, next: NextFunction) {
-    const { id } = req.params;
+    const { userId } = req.params;
 
-    User.findById(id)
+    User.findById(userId)
       .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
       .then((user: IUser) => res.send(user))
       .catch(next);
   }
 
   static updateUser(req: Request, res: Response, next: NextFunction) {
-    const { _id, name, about } = req.body;
+    const { name, about } = req.body;
+    const { _id } = req.body.user;
 
     User.findByIdAndUpdate(_id, { name, about }, { new: true, runValidators: true })
       .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
@@ -73,7 +75,8 @@ class UserController {
   }
 
   static updateUserAvatar(req: Request, res: Response, next: NextFunction) {
-    const { _id, avatar } = req.body;
+    const { avatar } = req.body;
+    const { _id } = req.body.user;
 
     User.findByIdAndUpdate(_id, { avatar }, { new: true, runValidators: true })
       .orFail(() => new NotFoundError('Пользователь с указанным id не найден'))
@@ -100,7 +103,7 @@ class UserController {
         });
       })
       .then((user) => {
-        const token = jwt.sign({ _id: user._id }, 'some-secret-key', {
+        const token = jwt.sign({ _id: user._id }, CONFIG.JWT_TOKEN, {
           expiresIn: '7d',
         });
 

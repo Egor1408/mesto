@@ -38,7 +38,7 @@ cardRouter.post(
 );
 
 cardRouter.delete(
-  '/cards/:id',
+  '/cards/:cardId',
   celebrate({
     params: {
       cardId: Joi.string().alphanum().length(24).required(),
@@ -53,7 +53,7 @@ cardRouter.delete(
 );
 
 cardRouter.put(
-  '/cards/:id/likes',
+  '/cards/:cardId/likes',
   celebrate({
     params: {
       cardId: Joi.string().alphanum().length(24).required(),
@@ -68,7 +68,7 @@ cardRouter.put(
 );
 
 cardRouter.delete(
-  '/cards/:id/likes',
+  '/cards/:cardId/likes',
   celebrate({
     params: {
       cardId: Joi.string().alphanum().length(24).required(),
